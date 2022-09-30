@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        // L'évènement DOMContentLoaded (ou load) se déclenche quand tout le contenu HTML de la page est chargé. Si on n'attend pas la fin du chargement, toutes les tentatives de récupérer un élément du DOM sera un échec  
+        window.addEventListener("DOMContentLoaded", () => {
+            document.querySelector("form").addEventListener("submit", (eventSubmit) => {
+                // J'annule le comportement par défaut de l'évènement Submit
+                // donc quand je vais cliquer sur le bouton, le formulaire ne va pas être envoyé
+                eventSubmit.preventDefault();
+                console.log("l'évènement Submit est annulé");
+                
+                // Pour faire une requête AJAX avec javascript, on utilise un objet de la classe XMLHttpRequest
+                let xhr = new XMLHttpRequest;
+                
+                let inputA = document.getElementsByName("a")[0];
+                let inputB = document.getElementsByName("b")[0];
+                let queryString = "a=" + inputA.value + "&b=" + inputB.value;
+
+                // on définit l'URL ciblée par la requête AJAX ainsi que la méthode HTTP
+                /* ETATS :
+                    0 : état initial - la requête n'a pas été envoyé
+                    1 : requête ouverte (utilisation de la méthode 'open')
+                    2 : entêtes reçus (le serveur a répondu, l'objet xhr a reçu les entêtes)
+                    3 : chargement : la réponse du serveur est reçu par paquets (c'est l'état qui peut durer le plus longtemps)
+                    4 : effectué : la réponse de la requête a été reçu
+                */
+                xhr.open("GET", "calcul.php?" + queryString);
+
+                // on définit ce qu'il va se passer quand la requête AJAX aura aboutie
+                xhr.onreadystatechange = () => {
+                    if(xhr.readyState == 4 && xhr.status == 200){
+                        document.querySelector("#resultat").innerHTML = xhr.responseText;
+                    }
+                }
+                xhr.send();
+            });
+        })
+
+        window.addEventListener("DOMContentLoaded", () => {
+            document.querySelector("#soustraction").addEventListener("submit", (eventSubmit) => {
+
+                eventSubmit.preventDefault();
+
+                let xhr = new XMLHttpRequest;
+                
+                // let inputC = document.getElementsByName("c")[0];
+                // let inputD = document.getElementsByName("d")[0];
+                // let queryString = "c=" + inputC.value + "&d=" + inputD.value;
+
+                xhr.open("POST", "soustract.php", true);
+                // xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = () => {
+                    if(xhr.readyState == 4 && xhr.status == 200){
+                        document.getElementsByName("soustract")[0].value = xhr.responseText;
+                    }
+                }
+                let donnees = new FormData(eventSubmit.target);
+                xhr.send(donnees);
+            });
+        })
+    </script>
+</head>
+<body>
+    <h1>AJAX</h1>
+
+    <form action="calcul.php" method="get">
+        <label for="a">1er nombre</label>
+        <input type="text" id="a" name="a">
+        
+        <label for="b">2ème nombre</label>
+        <input type="text" id="b" name="b">
+        <button type="submit">Calculer</button>
+    </form>
+
+    <div id="resultat"></div>
+
+    <hr>
+
+    <form id="soustraction" action="soustract.php" method="post">
+        <input type="text" id="c" name="c">
+        -
+        <input type="text" id="d" name="d">
+
+        <button id="submit2" type="submit">=</button>
+
+        <input style="margin-left: 5px; width: 30px;" type="text" name="soustract" value="">
+    </form>
+
+</body>
+</html>
